@@ -1,0 +1,1 @@
+cmd_Release/obj.target/addon.node := g++ -shared -pthread -rdynamic -m64 -L/opt/rrdtool-1.7.2/lib/  -Wl,-soname=addon.node -o Release/obj.target/addon.node -Wl,--start-group Release/obj.target/addon/addon.o -Wl,--end-group -lrrd
