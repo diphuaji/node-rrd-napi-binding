@@ -1,0 +1,5 @@
+addon.cc.orig
+insert.sh
+temp.rrd
+build/*
+.vscode/c_cpp_properties.json
