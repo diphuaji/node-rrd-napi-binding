@@ -9,15 +9,16 @@
 napi_value register_rrd_func_v1(
     napi_env env,
     napi_callback_info info,
-    int rrd_func(int, char **argv)
-) {
+    int rrd_func(int, char **argv))
+{
     napi_status status;
     napi_value result;
     status = napi_get_boolean(env, false, &result);
     assert(status == napi_ok);
     ArgvInfo argv_info;
-    if(!assign_argv_info(env, info, &argv_info)) return result;
-    status = napi_get_boolean(env, rrd_func(argv_info.argc, argv_info.argv)==0, &result);
+    if (!assign_argv_info(env, info, &argv_info))
+        return result;
+    status = napi_get_boolean(env, rrd_func(argv_info.argc, argv_info.argv) == 0, &result);
     assert(status == napi_ok);
     free_argv_info_related_resources(argv_info);
     print_rrd_error();
@@ -26,43 +27,35 @@ napi_value register_rrd_func_v1(
 
 napi_value Create(
     napi_env env,
-    napi_callback_info info
-) {
+    napi_callback_info info)
+{
     return register_rrd_func_v1(env, info, rrd_create);
 }
 
 napi_value Update(
     napi_env env,
-    napi_callback_info info
-) {
+    napi_callback_info info)
+{
     return register_rrd_func_v1(env, info, rrd_update);
 }
 
 napi_value Fetch(
     napi_env env,
-    napi_callback_info info
-) {
+    napi_callback_info info)
+{
     napi_status status;
     napi_value result;
     status = napi_get_boolean(env, false, &result);
     assert(status == napi_ok);
     ArgvInfo argv_info;
-    if(!assign_argv_info(env, info, &argv_info)) return result;
+    if (!assign_argv_info(env, info, &argv_info))
+        return result;
 
-    time_t    start, end;
+    time_t start, end;
     unsigned long step, ds_cnt;
     rrd_value_t *data, *datai;
-    char    **ds_namv;
-    status = napi_get_boolean(env, rrd_fetch(
-          argv_info.argc, 
-          argv_info.argv,
-          &start,
-          &end, 
-          &step,
-          &ds_cnt, 
-          &ds_namv,
-          &data
-        )==0, &result);
+    char **ds_namv;
+    status = napi_get_boolean(env, rrd_fetch(argv_info.argc, argv_info.argv, &start, &end, &step, &ds_cnt, &ds_namv, &data) == 0, &result);
     print_rrd_error();
     free_argv_info_related_resources(argv_info);
 
@@ -99,31 +92,35 @@ napi_value Fetch(
     int count = 0;
 
     napi_value rows[ds_cnt];
-    for(int i=0; i<ds_cnt; i++){
-      napi_value row;
-      status = napi_create_array(env, &row);
-      assert(status == napi_ok);
-      rows[i] = row;
+    for (int i = 0; i < ds_cnt; i++)
+    {
+        napi_value row;
+        status = napi_create_array(env, &row);
+        assert(status == napi_ok);
+        rows[i] = row;
     }
 
-    for (time_t ti = start + step; ti <= end; ti += step) {
-      for(int i=0; i<ds_cnt; i++){
-        napi_value tmp_value;
-        status = napi_create_double(env, *(datai++), &tmp_value);
+    for (time_t ti = start + step; ti <= end; ti += step)
+    {
+        for (int i = 0; i < ds_cnt; i++)
+        {
+            napi_value tmp_value;
+            status = napi_create_double(env, *(datai++), &tmp_value);
+            assert(status == napi_ok);
+            status = napi_set_element(env, rows[i], count, tmp_value);
+            assert(status == napi_ok);
+        }
+        napi_value timestamp;
+        convert_time_to_int(env, ti, &timestamp);
+        status = napi_set_element(env, timestamps, count, timestamp);
         assert(status == napi_ok);
-        status = napi_set_element(env, rows[i], count, tmp_value);
-        assert(status == napi_ok);
-      }
-      napi_value timestamp;
-      convert_time_to_int(env, ti, &timestamp);
-      status = napi_set_element(env, timestamps, count, timestamp);
-      assert(status == napi_ok);
-      count++;
+        count++;
     }
 
-    for(int i=0; i<ds_cnt; i++){
-      status = napi_set_element(env, data_value, i, rows[i]);
-      assert(status == napi_ok);
+    for (int i = 0; i < ds_cnt; i++)
+    {
+        status = napi_set_element(env, data_value, i, rows[i]);
+        assert(status == napi_ok);
     }
 
     status = napi_set_named_property(env, result, "timestamps", timestamps);
@@ -153,12 +150,12 @@ napi_value Fetch(
 //    double    ymin, ymax;
 //    char **calcpr;
 //    status = napi_get_boolean(env, rrd_graph(
-//          argv_info.argc, 
+//          argv_info.argc,
 //          argv_info.argv,
 //          &calcpr,
-//          &xsize, 
+//          &xsize,
 //          &ysize,
-//          &ymin, 
+//          &ymin,
 //          &ymax
 //        )==0, &result);
 //    assert(status == napi_ok);
@@ -167,10 +164,13 @@ napi_value Fetch(
 //    return result;
 //}
 
-#define DECLARE_NAPI_METHOD(name, func)                                        \
-{ name, 0, func, 0, 0, 0, napi_default, 0 }
+#define DECLARE_NAPI_METHOD(name, func)         \
+    {                                           \
+        name, 0, func, 0, 0, 0, napi_default, 0 \
+    }
 
-napi_value Init(napi_env env, napi_value exports) {
+napi_value Init(napi_env env, napi_value exports)
+{
     napi_status status;
     size_t descriptorNum = 3;
     napi_property_descriptor descriptors[descriptorNum];

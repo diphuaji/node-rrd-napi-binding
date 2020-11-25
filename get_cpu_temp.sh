@@ -1,0 +1,1 @@
+sensors|sed -rn "s/^Package id 0:[ ]*\+?([0-9.]+).*/\1/p"

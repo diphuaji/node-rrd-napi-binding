@@ -1,15 +1,13 @@
-"use strict";
-exports.__esModule = true;
-exports.addon = void 0;
-var bindings = require("bindings");
-var addonNative = bindings('addon.node');
-var addon = function (command, args) {
-    if (!addonNative.hasOwnProperty(command)) {
-        throw new Error("The command - " + command + " doesn't exist in the addon.");
-    }
-    addonNative[command].apply(null, args);
+import * as bindings from 'bindings'
+let addonNative = bindings('addon.node')
+let addon = (command: string, args: string[]) => {
+  if (!addonNative.hasOwnProperty(command)) {
+    throw new Error(`The command - ${command} doesn't exist in the addon.`)
+  }
+  addonNative[command].apply(null, args)
 };
-exports.addon = addon;
+export { addon }
+
 // console.log(process.argv)
 // let argv = process.argv
 // if (argv.length < 3) {
