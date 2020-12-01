@@ -1,12 +1,16 @@
 import * as bindings from 'bindings'
 let addonNative = bindings('addon.node')
-let addon = (command: string, args: string[]) => {
+let wrapperFunc = (command: string, args: string[]) => {
   if (!addonNative.hasOwnProperty(command)) {
     throw new Error(`The command - ${command} doesn't exist in the addon.`)
   }
-  addonNative[command].apply(null, args)
+  return addonNative[command].apply(null, args)
 };
-export { addon }
+let create = (args: string[]) => wrapperFunc('create', args);
+let update = (args: string[]) => wrapperFunc('update', args);
+let fetch = (args: string[]) => wrapperFunc('fetch', args);
+
+export { create, update, fetch }
 
 // console.log(process.argv)
 // let argv = process.argv
